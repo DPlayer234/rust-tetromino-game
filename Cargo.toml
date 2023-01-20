@@ -1,0 +1,11 @@
+[workspace]
+
+members = [
+    "tetris_app",
+    "tetris_core",
+    "tetris_piston"
+]
+
+[profile.release]
+lto = true
+panic = 'abort'
