@@ -1,5 +1,5 @@
-use crate::{Color, Vec2I8};
-use crate::pieces::{PieceData, PIECE_DATA_COUNT};
+use crate::misc::{Color, Vec2I8};
+use crate::pieces::{PieceData, PIECE_COUNT};
 
 use std::collections::VecDeque;
 use rand::{rngs::StdRng, Rng, SeedableRng};
@@ -24,13 +24,13 @@ pub struct ActivePiece {
 }
 
 pub struct Playfield {
-    pub fill_state: [[Color; PLAYFIELD_WIDTH]; PLAYFIELD_HEIGHT * 2],
+    fill_state: [[Color; PLAYFIELD_WIDTH]; PLAYFIELD_HEIGHT * 2],
 }
 
 pub struct RandomGenerator {
     rng: StdRng,
-    pieces: [PieceData; PIECE_DATA_COUNT],
-    bag: [usize; PIECE_DATA_COUNT],
+    pieces: [PieceData; PIECE_COUNT],
+    bag: [usize; PIECE_COUNT],
     bag_left: usize
 }
 
@@ -318,7 +318,7 @@ impl RandomGenerator {
     pub fn new() -> RandomGenerator {
         RandomGenerator {
             rng: StdRng::from_entropy(),
-            pieces: PieceData::make_all_pieces(),
+            pieces: PieceData::create_all_pieces(),
             bag: [0; 7],
             bag_left: 0
         }

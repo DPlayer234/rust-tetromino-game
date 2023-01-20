@@ -1,9 +1,10 @@
-use tetris_core::game::{PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT, Game};
+use tetris_core::{PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT, Game, Color as TtColor};
 
 use glutin_window::GlutinWindow;
 use opengl_graphics::{GlGraphics, OpenGL};
 use graphics::{Transformed, Context, color, rectangle};
 use graphics::math::Matrix2d;
+use graphics::types::{Color as GlColor, ColorComponent as GlColorComponent};
 use piston::event_loop::{Events, EventSettings, EventLoop};
 use piston::input::{UpdateEvent, Key, UpdateArgs, RenderArgs, PressEvent, RenderEvent, Button};
 use piston::window::WindowSettings;
@@ -21,11 +22,11 @@ pub struct TetrisPistonGame {
     is_game_over: bool,
 }
 
-fn tetris_to_graphics_color(c: tetris_core::Color) -> graphics::types::Color {
+fn tetris_to_graphics_color(c: TtColor) -> GlColor {
     [
-        c.r as graphics::types::ColorComponent / 255.0,
-        c.g as graphics::types::ColorComponent / 255.0,
-        c.b as graphics::types::ColorComponent / 255.0,
+        c.r as GlColorComponent / 255.0,
+        c.g as GlColorComponent / 255.0,
+        c.b as GlColorComponent / 255.0,
         255.0
     ]
 }
@@ -101,10 +102,11 @@ impl TetrisPistonGame {
             rectangle(color::grey(0.15), rectangle::rectangle_by_corners(0.0, 0.0, 10.0, 20.0), field_trs, &mut self.gl);
 
             // Render the playing field
+            let playfield = self.game.playfield();
             let full_field_trs = field_trs.trans(0.0, -(PLAYFIELD_HEIGHT as f64));
             for x in 0..PLAYFIELD_WIDTH {
                 for y in 0..(PLAYFIELD_HEIGHT * 2) {
-                    let tile = self.game.playfield().get_tile(x, y);
+                    let tile = playfield.get_tile(x, y);
                     if !tile.is_black() {
                         let color = tetris_to_graphics_color(tile);
                         let block_trs = full_field_trs.trans(x as f64, y as f64);
