@@ -1,9 +1,11 @@
-use tetris_core::game::*;
+use tetris_core::game::{PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT, Game};
 
 use glutin_window::GlutinWindow;
 use opengl_graphics::{GlGraphics, OpenGL};
-use piston::event_loop::*;
-use piston::input::*;
+use graphics::{Transformed, Context, color, rectangle};
+use graphics::math::Matrix2d;
+use piston::event_loop::{Events, EventSettings, EventLoop};
+use piston::input::{UpdateEvent, Key, UpdateArgs, RenderArgs, PressEvent, RenderEvent, Button};
 use piston::window::WindowSettings;
 
 const EXTRA_LOCK_WAIT: f64 = 0.5;
@@ -87,9 +89,7 @@ impl TetrisPistonGame {
         self.gl.draw_begin(render_args.viewport());
 
         {
-            use graphics::*;
-            use math::*;
-            clear(color::BLACK, &mut self.gl);
+            graphics::clear(color::BLACK, &mut self.gl);
             
             let square = rectangle::square(0.0, 0.0, 1.0);
             let c = Context::new_viewport(render_args.viewport());

@@ -1,7 +1,8 @@
 use crate::{Color, Vec2I8};
 use crate::pieces::{PieceData, PIECE_DATA_COUNT};
 
-use rand::{rngs::{StdRng}, Rng, SeedableRng};
+use std::collections::VecDeque;
+use rand::{rngs::StdRng, Rng, SeedableRng};
 
 pub const PLAYFIELD_WIDTH: usize = 10;
 pub const PLAYFIELD_HEIGHT: usize = 20;
@@ -9,7 +10,7 @@ pub const PLAYFIELD_HEIGHT: usize = 20;
 pub struct Game {
     playfield: Playfield,
     active_piece: ActivePiece,
-    next_pieces: Vec<PieceData>,
+    next_pieces: VecDeque<PieceData>,
     held_piece: Option<PieceData>,
     used_hold: bool,
     rng: RandomGenerator,
@@ -42,7 +43,7 @@ impl Game {
         let mut slf = Self {
             playfield: Playfield::new(),
             active_piece: ActivePiece::new(PieceData::default(), Vec2I8::new(0, 0)),
-            next_pieces: Vec::new(),
+            next_pieces: VecDeque::new(),
             held_piece: None,
             used_hold: false,
             rng: RandomGenerator::new(),
@@ -52,7 +53,7 @@ impl Game {
 
         let first = slf.rng.next_piece().clone();
         for _ in 0..NEXT_SIZE {
-            slf.next_pieces.push(slf.rng.next_piece().clone());
+            slf.next_pieces.push_back(slf.rng.next_piece().clone());
         }
 
         slf.spawn_new_piece(first);
@@ -102,8 +103,7 @@ impl Game {
             self.spawn_new_piece(held);
         } else {
             // Otherwise take one from the queue
-            let next_piece = self.next_pieces.remove(0);
-            self.next_pieces.push(self.rng.next_piece().clone());
+            let next_piece = self.pop_next_piece();
             self.spawn_new_piece(next_piece);
         }
 
@@ -116,8 +116,7 @@ impl Game {
         self.playfield.copy_in_piece(&self.active_piece);
 
         // Place the next piece in
-        let next_piece = self.next_pieces.remove(0);
-        self.next_pieces.push(self.rng.next_piece().clone());
+        let next_piece = self.pop_next_piece();
         self.used_hold = false;
 
         let cleared = self.clear_completed_lines();
@@ -140,12 +139,18 @@ impl Game {
         &self.active_piece
     }
 
-    pub fn next_pieces(&self) -> &Vec<PieceData> {
+    pub fn next_pieces(&self) -> &VecDeque<PieceData> {
         &self.next_pieces
     }
 
     pub fn held_piece(&self) -> Option<&PieceData> {
         self.held_piece.as_ref()
+    }
+
+    fn pop_next_piece(&mut self) -> PieceData {
+        let next_piece = self.next_pieces.pop_front().expect("next_pieces queue cannot be empty");
+        self.next_pieces.push_back(self.rng.next_piece().clone());
+        next_piece
     }
 
     fn spawn_new_piece(&mut self, new_piece: PieceData) -> bool {
