@@ -1,9 +1,9 @@
 [workspace]
 
 members = [
-    "tetris_app",
-    "tetris_core",
-    "tetris_piston"
+    "tetromino_app",
+    "tetromino_core",
+    "tetromino_piston"
 ]
 
 [profile.release]

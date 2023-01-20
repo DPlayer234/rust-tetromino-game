@@ -1419,29 +1419,29 @@ dependencies = [
 ]
 
 [[package]]
-name = "tetris_app"
+name = "tetromino_app"
 version = "0.1.0"
 dependencies = [
- "tetris_core",
- "tetris_piston",
+ "tetromino_core",
+ "tetromino_piston",
 ]
 
 [[package]]
-name = "tetris_core"
+name = "tetromino_core"
 version = "0.1.0"
 dependencies = [
  "rand",
 ]
 
 [[package]]
-name = "tetris_piston"
+name = "tetromino_piston"
 version = "0.1.0"
 dependencies = [
  "piston",
  "piston2d-graphics",
  "piston2d-opengl_graphics",
  "pistoncore-glutin_window",
- "tetris_core",
+ "tetromino_core",
 ]
 
 [[package]]

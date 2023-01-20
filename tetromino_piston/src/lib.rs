@@ -1,4 +1,4 @@
-use tetris_core::{PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT, Game, Color as TtColor};
+use tetromino_core::{PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT, TRUE_PLAYFIELD_HEIGHT, Game, Color as TtColor};
 
 use glutin_window::GlutinWindow;
 use opengl_graphics::{GlGraphics, OpenGL};
@@ -11,7 +11,8 @@ use piston::window::WindowSettings;
 
 const EXTRA_LOCK_WAIT: f64 = 0.5;
 
-pub struct TetrisPistonGame {
+/// A piston-framework based implementation for the game.
+pub struct PistonGame {
     game: Game,
     window: GlutinWindow,
     gl: GlGraphics,
@@ -22,7 +23,8 @@ pub struct TetrisPistonGame {
     is_game_over: bool,
 }
 
-fn tetris_to_graphics_color(c: TtColor) -> GlColor {
+/// Converts a tetromino-core color to a graphics color.
+fn tetromino_to_graphics_color(c: TtColor) -> GlColor {
     [
         c.r as GlColorComponent / 255.0,
         c.g as GlColorComponent / 255.0,
@@ -31,11 +33,12 @@ fn tetris_to_graphics_color(c: TtColor) -> GlColor {
     ]
 }
 
-impl TetrisPistonGame {
-    pub fn new(render_scale: f64) -> TetrisPistonGame {
+impl PistonGame {
+    /// Creates a new instance of the game with a specified render scale.
+    pub fn new(render_scale: f64) -> PistonGame {
         let opengl_api = OpenGL::V3_2;
 
-        let window = WindowSettings::new("rust-tetris", [render_scale * 26., render_scale * 22.])
+        let window = WindowSettings::new("rust-tetromino-game", [render_scale * 26., render_scale * 22.])
             .graphics_api(opengl_api)
             .exit_on_esc(true)
             .build()
@@ -43,7 +46,7 @@ impl TetrisPistonGame {
 
         let gl = GlGraphics::new(opengl_api);
 
-        TetrisPistonGame {
+        PistonGame {
             game: Game::new(),
             window,
             gl,
@@ -55,6 +58,7 @@ impl TetrisPistonGame {
         }
     }
 
+    /// Runs the game. This is the only method you will need to call.
     pub fn run(&mut self) {
         let mut event_settings = EventSettings::new();
         event_settings.set_max_fps(60);
@@ -77,6 +81,7 @@ impl TetrisPistonGame {
         }
     }
 
+    /// Renders the screen based on the arguments.
     fn render(&mut self, render_args: &RenderArgs) {
         let center = (
             render_args.window_size[0] / (2.0 * self.render_scale),
@@ -105,10 +110,10 @@ impl TetrisPistonGame {
             let playfield = self.game.playfield();
             let full_field_trs = field_trs.trans(0.0, -(PLAYFIELD_HEIGHT as f64));
             for x in 0..PLAYFIELD_WIDTH {
-                for y in 0..(PLAYFIELD_HEIGHT * 2) {
+                for y in 0..TRUE_PLAYFIELD_HEIGHT {
                     let tile = playfield.get_tile(x, y);
                     if !tile.is_black() {
-                        let color = tetris_to_graphics_color(tile);
+                        let color = tetromino_to_graphics_color(tile);
                         let block_trs = full_field_trs.trans(x as f64, y as f64);
                         rectangle(color, square, block_trs, &mut self.gl);
                     }
@@ -119,7 +124,7 @@ impl TetrisPistonGame {
             draw_piece(
                 &mut self.gl,
                 field_trs.trans(active_piece.position.x as f64, active_piece.position.y as f64 - 20.0),
-                &active_piece.get_matrix(),
+                &active_piece.matrix(),
                 active_piece.piece_data.color()
             );
 
@@ -128,7 +133,7 @@ impl TetrisPistonGame {
                 draw_piece(
                     &mut self.gl,
                     field_trs.trans(-5.0, 0.0),
-                    &held_piece.states()[0].get_matrix(),
+                    &held_piece.default_matrix(),
                     held_piece.color()
                 );
             }
@@ -139,14 +144,15 @@ impl TetrisPistonGame {
                 draw_piece(
                     &mut self.gl,
                     next_trs.trans(0.0, (i as f64) * 4.5),
-                    &np.states()[0].get_matrix(),
+                    &np.default_matrix(),
                     np.color()
                 );
             }
 
-            fn draw_piece(gl: &mut opengl_graphics::GlGraphics, piece_trs: Matrix2d, piece_mtrx: &[[bool; 4]; 4], color: tetris_core::Color) {
+            /// Draws a single piece to the screen.
+            fn draw_piece(gl: &mut opengl_graphics::GlGraphics, piece_trs: Matrix2d, piece_mtrx: &[[bool; 4]; 4], color: TtColor) {
                 let square = rectangle::square(0.0, 0.0, 1.0);
-                let color = tetris_to_graphics_color(color);
+                let color = tetromino_to_graphics_color(color);
                 for x in 0..4 {
                     for y in 0..4 {
                         if piece_mtrx[x][y] {
@@ -161,6 +167,7 @@ impl TetrisPistonGame {
         self.gl.draw_end();
     }
 
+    /// Updates the game based on the update step.
     fn update(&mut self, update_args: &UpdateArgs) {
         self.auto_down_left -= update_args.dt;
         
@@ -175,8 +182,9 @@ impl TetrisPistonGame {
         }
     }
 
+    /// Prepares dropping the next piece within the update step.
     fn update_prepare_next_piece(&mut self) {
-        if let Some(cl) = self.game.lock_down_piece() {
+        if let Some(cl) = self.game.finish_piece_turn() {
             self.cleared_lines += cl;
             self.auto_down_left = self.get_auto_down_time();
 
@@ -187,6 +195,7 @@ impl TetrisPistonGame {
         }
     }
 
+    /// Called when a key is pressed. Used for handling input.
     fn on_key_press(&mut self, key: &Key) {
         match key {
             // Move left
@@ -233,6 +242,7 @@ impl TetrisPistonGame {
         };
     }
 
+    /// Gets the delay between automatic moves down.
     fn get_auto_down_time(&self) -> f64 {
         2.0 / (self.difficulty as f64 + 0.5)
     }

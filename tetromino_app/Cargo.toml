@@ -1,5 +1,5 @@
 [package]
-name = "tetris_app"
+name = "tetromino_app"
 version = "0.1.0"
 authors = ["Darius Kinstler <darius.kinstler@duatec.at>"]
 edition = "2018"
@@ -7,5 +7,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tetris_core = { path = "../tetris_core" }
-tetris_piston = { path = "../tetris_piston" }
+tetromino_core = { path = "../tetromino_core" }
+tetromino_piston = { path = "../tetromino_piston" }

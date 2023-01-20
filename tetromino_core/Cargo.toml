@@ -1,5 +1,5 @@
 [package]
-name = "tetris_core"
+name = "tetromino_core"
 version = "0.1.0"
 authors = ["Darius Kinstler <darius.kinstler@duatec.at>"]
 edition = "2018"
