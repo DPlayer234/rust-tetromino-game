@@ -259,15 +259,23 @@ impl Game {
     /// Attempts all SRS kick options until one succeeds or all were tried.
     fn try_move_kicks(&mut self, trg_rot: usize, kick_tests: &[Vec2I8; 4]) -> bool {
         for &t in kick_tests.iter() {
-            if self.try_move(|p, r| {
+            let c = |p: &mut Vec2I8, r: &mut usize| {
                 *r = trg_rot;
                 *p += t;
-            }) {
+            };
+
+            if self.try_move(c) {
                 return true;
             }
         }
 
         false
+    }
+}
+
+impl Default for Game {
+    fn default() -> Self {
+        Game::new()
     }
 }
 
@@ -391,6 +399,12 @@ impl Playfield {
     }
 }
 
+impl Default for Playfield {
+    fn default() -> Self {
+        Playfield::new()
+    }
+}
+
 impl RandomGenerator {
     /// Creates a new random generator with an empty bag.
     pub fn new() -> RandomGenerator {
@@ -416,5 +430,11 @@ impl RandomGenerator {
             self.bag_left = 6;
             &self.pieces[self.bag[6]]
         }
+    }
+}
+
+impl Default for RandomGenerator {
+    fn default() -> Self {
+        RandomGenerator::new()
     }
 }
